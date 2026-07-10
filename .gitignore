@@ -1,0 +1,45 @@
+# ── Secretos (NUNCA subir) ──────────────────────────────────────────
+.env
+.env.local
+**/.env.local
+**/.env*.local
+*.pem
+*.key
+id_rsa*
+*wallet*.json
+peruvianmarket-wallet-*.json
+oracle_key.json
+**/oracle_key.json
+*_key.json
+
+# ── Dependencias ────────────────────────────────────────────────────
+node_modules/
+**/node_modules/
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ── Python (venv del prototipo) ─────────────────────────────────────
+peruvianmarket/venv/
+**/venv/
+__pycache__/
+*.pyc
+
+# ── Build de Next.js ────────────────────────────────────────────────
+.next/
+**/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# ── Tooling local / IDE ─────────────────────────────────────────────
+.vercel
+.claude/
+.qodo/
+.DS_Store
+*.log
+npm-debug.log*
+
+# ── Cobertura de tests ──────────────────────────────────────────────
+/coverage

@@ -1,0 +1,762 @@
+<title>PeruvianMarket — Criptografía Aplicada</title>
+<style>
+  :root {
+    --ink: #16130f;
+    --ink-soft: #201b14;
+    --ink-card: #262019;
+    --cream: #f2e9dc;
+    --cream-dim: rgba(242,233,220,.62);
+    --cream-faint: rgba(242,233,220,.38);
+    --line: rgba(242,233,220,.13);
+    --terra: #e06a3d;
+    --terra-soft: rgba(224,106,61,.16);
+    --mustard: #d9a441;
+    --mustard-soft: rgba(217,164,65,.14);
+    --ok: #55b382;
+    --ok-soft: rgba(85,179,130,.14);
+    --warn: #d9a441;
+    --bad: #d96459;
+    --bad-soft: rgba(217,100,89,.13);
+    --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: var(--sans);
+    line-height: 1.55;
+  }
+
+  .slide {
+    min-height: 100svh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(28px, 5vw, 72px) clamp(20px, 6vw, 96px);
+    position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  .slide-inner { max-width: 1060px; width: 100%; margin: 0 auto; }
+
+  .slide-num {
+    position: absolute; top: 22px; right: clamp(20px, 6vw, 96px);
+    font-family: var(--mono); font-size: 12px; color: var(--cream-faint);
+    letter-spacing: .08em;
+  }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--terra); margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(34px, 5.4vw, 64px); font-weight: 800; letter-spacing: -.02em;
+    line-height: 1.06; margin: 0 0 18px; text-wrap: balance;
+  }
+  h2 {
+    font-size: clamp(26px, 3.4vw, 40px); font-weight: 800; letter-spacing: -.015em;
+    line-height: 1.12; margin: 0 0 22px; text-wrap: balance;
+  }
+  h3 { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
+  p { margin: 0 0 12px; }
+  .lead { font-size: clamp(16px, 1.8vw, 20px); color: var(--cream-dim); max-width: 62ch; }
+  .dim { color: var(--cream-dim); }
+  .faint { color: var(--cream-faint); }
+  .small { font-size: 13.5px; }
+  .accent { color: var(--terra); }
+  .gold { color: var(--mustard); }
+  .good { color: var(--ok); }
+  .risk { color: var(--bad); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 860px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--ink-soft); border: 1px solid var(--line);
+    border-radius: 10px; padding: 18px 20px;
+  }
+  .card h3 { display: flex; align-items: center; gap: 8px; }
+
+  code, .mono { font-family: var(--mono); }
+  .codeblock {
+    background: #0f0d0a; border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px; font-family: var(--mono); font-size: 13px;
+    line-height: 1.6; overflow-x: auto; white-space: pre; color: var(--cream-dim);
+  }
+  .codeblock .k { color: var(--terra); }
+  .codeblock .s { color: var(--mustard); }
+  .codeblock .c { color: var(--cream-faint); }
+  .codeblock .f { color: #8ec9a8; }
+  .codelabel {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--cream-faint); margin: 0 0 6px;
+  }
+
+  .flow {
+    display: flex; align-items: stretch; gap: 0; overflow-x: auto;
+    padding: 6px 0; font-family: var(--mono); font-size: 13px;
+  }
+  .fbox {
+    background: var(--ink-card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; min-width: 130px; text-align: center; flex-shrink: 0;
+    display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  }
+  .fbox b { color: var(--cream); font-weight: 700; font-size: 13.5px; }
+  .fbox span { color: var(--cream-faint); font-size: 11.5px; }
+  .fbox.hot { border-color: rgba(224,106,61,.5); background: var(--terra-soft); }
+  .fbox.gold { border-color: rgba(217,164,65,.5); background: var(--mustard-soft); }
+  .farrow {
+    display: flex; align-items: center; padding: 0 10px;
+    color: var(--terra); font-size: 17px; flex-shrink: 0;
+  }
+  .farrow small { font-size: 10px; color: var(--cream-faint); margin-left: 4px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th {
+    text-align: left; font-family: var(--mono); font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: .1em; color: var(--cream-faint);
+    padding: 8px 14px 8px 0; border-bottom: 1px solid var(--line); font-weight: 600;
+  }
+  td { padding: 9px 14px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td code { font-size: 12.5px; color: var(--mustard); }
+  .tablewrap { overflow-x: auto; }
+
+  .pill {
+    display: inline-block; font-family: var(--mono); font-size: 11px;
+    padding: 2px 9px; border-radius: 99px; letter-spacing: .05em; white-space: nowrap;
+  }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); border: 1px solid rgba(85,179,130,.35); }
+  .pill.warn { background: var(--mustard-soft); color: var(--mustard); border: 1px solid rgba(217,164,65,.35); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); border: 1px solid rgba(217,100,89,.35); }
+
+  ul.checks { list-style: none; padding: 0; margin: 0; }
+  ul.checks li { padding: 7px 0 7px 30px; position: relative; border-bottom: 1px solid var(--line); }
+  ul.checks li::before {
+    content: "✓"; position: absolute; left: 4px; color: var(--ok);
+    font-family: var(--mono); font-weight: 700;
+  }
+  ul.checks li.x::before { content: "✗"; color: var(--bad); }
+  ul.checks li.w::before { content: "△"; color: var(--mustard); }
+
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 18px; font-size: 14px; }
+  .kv dt { font-family: var(--mono); font-size: 12px; color: var(--cream-faint); padding-top: 2px; }
+  .kv dd { margin: 0; }
+
+  .hero-brand {
+    display: inline-flex; align-items: center; gap: 14px; margin-bottom: 30px;
+  }
+  .hero-logo {
+    width: 52px; height: 52px; border-radius: 12px; background: var(--terra);
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+  }
+  .hero-wordmark { font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
+  .hero-wordmark .accent { color: var(--terra); }
+
+  .keystrip {
+    font-family: var(--mono); font-size: 12px; color: var(--cream-faint);
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px;
+    overflow-x: auto; white-space: nowrap; background: #0f0d0a;
+  }
+
+  .navhint {
+    position: fixed; bottom: 18px; right: 22px; z-index: 10;
+    font-family: var(--mono); font-size: 11.5px; color: var(--cream-faint);
+    background: rgba(22,19,15,.85); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 12px; backdrop-filter: blur(4px);
+  }
+  .progress {
+    position: fixed; top: 0; left: 0; height: 3px; background: var(--terra);
+    width: 0%; z-index: 20; transition: width .2s ease;
+  }
+  @media (prefers-reduced-motion: reduce) { .progress { transition: none; } }
+
+  .footline {
+    margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: 12px; color: var(--cream-faint);
+  }
+
+  @media print {
+    html { scroll-snap-type: none; }
+    .slide { page-break-after: always; min-height: auto; }
+    .navhint, .progress { display: none; }
+  }
+
+  :focus-visible { outline: 2px solid var(--terra); outline-offset: 3px; }
+</style>
+
+<div class="progress" id="bar"></div>
+<div class="navhint">← → navegar · <span id="pos">1</span>/15</div>
+
+<!-- 1 · PORTADA -->
+<section class="slide" id="s1">
+  <div class="slide-num">01 / 15</div>
+  <div class="slide-inner">
+    <div class="hero-brand">
+      <div class="hero-logo">📈</div>
+      <div class="hero-wordmark">Peruvian<span class="accent">Market</span></div>
+    </div>
+    <p class="eyebrow">Proyecto de Criptografía · UTEC</p>
+    <h1>Mercados de predicción con criptografía real de extremo a extremo</h1>
+    <p class="lead">Wallets secp256k1 estilo Bitcoin, transacciones firmadas con ECDSA, bóveda de llaves AES-256-GCM en el cliente, y un oráculo Ed25519 que firma cada resolución. Producto funcional, desplegado y público.</p>
+    <div class="keystrip">demo → https://bot.tail48662d.ts.net &nbsp;·&nbsp; stack → Next.js 15 + Supabase + Raspberry Pi</div>
+  </div>
+</section>
+
+<!-- 2 · MOTIVACIÓN -->
+<section class="slide" id="s2">
+  <div class="slide-num">02 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Motivación</p>
+    <h2>Apostar entre amigos exige confianza. La criptografía la reemplaza.</h2>
+    <div class="grid3">
+      <div class="card">
+        <h3>🔑 El problema de custodia</h3>
+        <p class="small dim">¿Quién guarda el dinero? Nadie debería poder mover tus fondos sin tu autorización. <b class="gold">Solución:</b> cada usuario genera su propio par de llaves; toda transferencia exige su firma ECDSA.</p>
+      </div>
+      <div class="card">
+        <h3>⚖️ El problema del árbitro</h3>
+        <p class="small dim">¿Quién decide si "Perú clasifica al Mundial" ocurrió? <b class="gold">Solución:</b> un oráculo con llave Ed25519 firma cada resolución — cualquiera puede verificarla.</p>
+      </div>
+      <div class="card">
+        <h3>📜 El problema del historial</h3>
+        <p class="small dim">¿Cómo pruebo que una apuesta existió? <b class="gold">Solución:</b> ledger de transacciones auditable con firmas persistidas, consultable por todos.</p>
+      </div>
+    </div>
+    <p class="footline">Producto: mercados Sí/No y multi-opción con AMM (x·y=k), casino con 7 juegos, wallet CHC, minería, tareas — todo operando sobre las mismas primitivas criptográficas.</p>
+  </div>
+</section>
+
+<!-- 3 · CUMPLIMIENTO -->
+<section class="slide" id="s3">
+  <div class="slide-num">03 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Requisitos del curso</p>
+    <h2>Mapa de cumplimiento</h2>
+    <div class="tablewrap">
+      <table>
+        <tr><th>Requisito</th><th>Implementación</th><th>Dónde</th><th>Estado</th></tr>
+        <tr>
+          <td>Cifrado simétrico autenticado</td>
+          <td>AES-256-GCM (WebCrypto nativo)</td>
+          <td><code>lib/crypto.ts</code></td>
+          <td><span class="pill ok">CUMPLE</span></td>
+        </tr>
+        <tr>
+          <td>Derivación de llave (KDF)</td>
+          <td>PBKDF2-SHA256 · 600 000 iteraciones (OWASP 2023)</td>
+          <td><code>lib/crypto.ts</code></td>
+          <td><span class="pill ok">CUMPLE</span></td>
+        </tr>
+        <tr>
+          <td>Salt y nonce únicos</td>
+          <td>Salt 16 B + IV 12 B aleatorios por operación (CSPRNG)</td>
+          <td><code>lib/crypto.ts</code></td>
+          <td><span class="pill ok">CUMPLE</span></td>
+        </tr>
+        <tr>
+          <td>Criptografía asimétrica</td>
+          <td>secp256k1 (ECDSA) <b>+</b> Ed25519 — dos esquemas</td>
+          <td><code>lib/crypto.ts · lib/oracle.ts</code></td>
+          <td><span class="pill ok">CUMPLE</span></td>
+        </tr>
+        <tr>
+          <td>Cifrado híbrido (acuerdo de claves)</td>
+          <td>ECDH secp256k1 → AES-256-GCM — mercados P2P privados extremo a extremo</td>
+          <td><code>lib/crypto.ts · /p2p</code></td>
+          <td><span class="pill ok">CUMPLE</span></td>
+        </tr>
+        <tr>
+          <td>Firmas digitales de autenticidad</td>
+          <td>Transferencias (ECDSA) y resoluciones (Ed25519), verificadas server-side</td>
+          <td><code>api/wallet/transfer · api/oracle</code></td>
+          <td><span class="pill ok">CUMPLE</span></td>
+        </tr>
+        <tr>
+          <td>Librerías probadas, nada desde cero</td>
+          <td>@noble/secp256k1 · @noble/ed25519 · @noble/hashes (auditadas) · WebCrypto</td>
+          <td><code>package.json</code></td>
+          <td><span class="pill ok">CUMPLE</span></td>
+        </tr>
+        <tr>
+          <td>Producto funcional en caso de uso real</td>
+          <td>Web app desplegada en Raspberry Pi, pública vía HTTPS</td>
+          <td><code>bot.tail48662d.ts.net</code></td>
+          <td><span class="pill ok">CUMPLE</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · ARQUITECTURA -->
+<section class="slide" id="s4">
+  <div class="slide-num">04 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Arquitectura</p>
+    <h2>Las llaves nunca salen del navegador</h2>
+    <div class="flow" style="margin-bottom:22px">
+      <div class="fbox hot"><b>Navegador</b><span>genera llaves · firma tx · cifra AES-GCM</span></div>
+      <div class="farrow">→<small>TLS</small></div>
+      <div class="fbox"><b>Tailscale Funnel</b><span>certificado HTTPS · relay público</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>Raspberry Pi</b><span>Next.js 15 · verifica firmas · lógica AMM/casino</span></div>
+      <div class="farrow">→<small>TLS</small></div>
+      <div class="fbox gold"><b>Supabase</b><span>Postgres AES-256 at rest · Auth bcrypt+JWT</span></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Lado cliente (no-custodial)</h3>
+        <ul class="checks small">
+          <li>Par de llaves secp256k1 generado localmente</li>
+          <li>Llave privada cifrada con AES-256-GCM antes de tocar disco</li>
+          <li>Firma de transacciones en el navegador</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Lado servidor (verificador)</h3>
+        <ul class="checks small">
+          <li>Verifica firma ECDSA + propiedad de wallet + nonce</li>
+          <li>Oráculo firma resoluciones con Ed25519</li>
+          <li>Jamás almacena ni recibe llaves privadas de usuarios</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · WALLETS -->
+<section class="slide" id="s5">
+  <div class="slide-num">05 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Asimétrica I · secp256k1</p>
+    <h2>Generación de wallets estilo Bitcoin</h2>
+    <div class="flow" style="margin-bottom:20px">
+      <div class="fbox"><b>privKey</b><span>32 B · CSPRNG</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>pubKey</b><span>33 B comprimida</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>SHA-256</b><span>+ RIPEMD-160</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>0x35 ‖ h160</b><span>byte de versión "P"</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>checksum</b><span>SHA-256² · 4 B</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox hot"><b>Base58</b><span>dirección final</span></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <p class="codelabel">lib/crypto.ts — derivación real</p>
+        <div class="codeblock"><span class="k">function</span> <span class="f">deriveAddress</span>(pubKeyBytes) {
+  <span class="k">const</span> hash160 = <span class="f">ripemd160</span>(<span class="f">sha256</span>(pubKeyBytes));
+  <span class="k">const</span> versioned = [<span class="s">0x35</span>, ...hash160];  <span class="c">// "P"</span>
+  <span class="k">const</span> checksum = <span class="f">sha256</span>(<span class="f">sha256</span>(versioned))
+                     .<span class="f">slice</span>(0, 4);
+  <span class="k">return</span> <span class="f">base58Encode</span>([...versioned, ...checksum]);
+}</div>
+      </div>
+      <div>
+        <p class="codelabel">Ejemplo real de la plataforma</p>
+        <div class="keystrip" style="white-space:normal; word-break:break-all; margin-bottom:12px;">
+          <span class="accent">addr</span> NLYTpsuc7xPNerk3ETAwJNAaqLQ95wHx94<br>
+          <span class="accent">pub&nbsp;</span> 031b6d7b79dc52c1…873cc32a5f (33 B)
+        </div>
+        <p class="small dim">El checksum de 4 bytes detecta errores de tipeo: una dirección alterada falla la verificación <b>antes</b> de enviar fondos. Mismo esquema que Bitcoin (P2PKH), con byte de versión propio.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · FIRMA ECDSA -->
+<section class="slide" id="s6">
+  <div class="slide-num">06 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Asimétrica I · Firma de transacciones</p>
+    <h2>Cada transferencia lleva una firma ECDSA verificada en el servidor</h2>
+    <div class="grid2">
+      <div>
+        <p class="codelabel">Cliente — firma (lib/crypto.ts)</p>
+        <div class="codeblock"><span class="c">// JSON canónico: claves ordenadas →</span>
+<span class="c">// mismo hash en cliente y servidor</span>
+<span class="k">const</span> msg  = <span class="f">canonicalJSON</span>(txData);
+<span class="k">const</span> hash = <span class="f">sha256</span>(<span class="f">encode</span>(msg));
+<span class="k">const</span> sig  = secp.<span class="f">sign</span>(hash, privKey);
+<span class="k">return</span> sig.<span class="f">toCompactRawBytes</span>();  <span class="c">// 64 B</span></div>
+      </div>
+      <div>
+        <p class="codelabel">Servidor — verificación (api/wallet/transfer)</p>
+        <div class="codeblock"><span class="k">if</span> (!<span class="f">verifySignature</span>(tx, sig, pubKey))
+  <span class="k">return</span> <span class="s">401</span> <span class="c">"Firma inválida"</span>;
+
+<span class="c">// pubKey debe pertenecer a la wallet</span>
+<span class="k">if</span> (!walletOwns(from, pubKey))
+  <span class="k">return</span> <span class="s">401</span> <span class="c">"Wallet no autorizada"</span>;
+
+<span class="c">// anti-replay: nonce monotónico</span>
+<span class="k">if</span> (nonce !== currentNonce + 1)
+  <span class="k">return</span> <span class="s">400</span> <span class="c">"Nonce inválido"</span>;</div>
+      </div>
+    </div>
+    <p class="footline">Mensaje firmado: <code class="mono small">{type, from, to, amount, nonce, timestamp}</code> — cualquier alteración de un solo campo invalida la firma.</p>
+  </div>
+</section>
+
+<!-- 7 · AES VAULT -->
+<section class="slide" id="s7">
+  <div class="slide-num">07 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Simétrica · AES-256-GCM</p>
+    <h2>Bóveda de llave privada: cifrado autenticado en el cliente</h2>
+    <div class="flow" style="margin-bottom:20px">
+      <div class="fbox"><b>contraseña</b><span>del usuario</span></div>
+      <div class="farrow">+</div>
+      <div class="fbox"><b>salt 16 B</b><span>aleatorio único</span></div>
+      <div class="farrow">→<small>PBKDF2 ×600k</small></div>
+      <div class="fbox gold"><b>llave AES-256</b><span>no extraíble</span></div>
+      <div class="farrow">→<small>GCM + IV 12 B</small></div>
+      <div class="fbox hot"><b>blob cifrado</b><span>salt ‖ iv ‖ ct+tag</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>localStorage</b><span>Base64</span></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <p class="codelabel">Parámetros (lib/crypto.ts)</p>
+        <dl class="kv">
+          <dt>cifrado</dt><dd>AES-GCM 256 bits — <b>autenticado</b>: cifra y sella integridad en una operación</dd>
+          <dt>KDF</dt><dd>PBKDF2-SHA256, 600 000 iteraciones (OWASP 2023) · formato versionado <code class="mono small">v2:</code> con migración transparente desde blobs legacy</dd>
+          <dt>salt</dt><dd>16 bytes CSPRNG, único por cifrado — evita rainbow tables</dd>
+          <dt>IV/nonce</dt><dd>12 bytes CSPRNG, único por cifrado — nunca se reutiliza con la misma llave</dd>
+          <dt>motor</dt><dd>WebCrypto (<code class="mono small">crypto.subtle</code>) — nativo del navegador</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Propiedad clave del diseño</h3>
+        <p class="small dim">El servidor <b class="accent">nunca ve</b> la llave privada: ni en claro ni cifrada. El blob vive solo en el navegador del usuario. Sin la contraseña maestra, el blob es inútil — GCM además detecta cualquier manipulación del ciphertext (tag de autenticación de 128 bits).</p>
+        <p class="small faint mono">descarga de respaldo: peruvianmarket-wallet-*.json</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · ORÁCULO -->
+<section class="slide" id="s8">
+  <div class="slide-num">08 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Asimétrica II · Ed25519</p>
+    <h2>El oráculo firma cada resolución de mercado</h2>
+    <div class="grid2">
+      <div>
+        <p class="codelabel">lib/oracle.ts — server-only</p>
+        <div class="codeblock"><span class="k">async function</span> <span class="f">signResolution</span>(marketId, outcome, ts) {
+  <span class="k">const</span> msg = <span class="s">`${marketId}:${outcome}:${ts}`</span>;
+  <span class="k">const</span> sig = <span class="k">await</span> ed.<span class="f">signAsync</span>(
+    <span class="f">encode</span>(msg),
+    ORACLE_PRIVATE_KEY   <span class="c">// solo en .env del server</span>
+  );
+  <span class="k">return</span> <span class="f">hex</span>(sig);  <span class="c">// persistida junto al mercado</span>
+}</div>
+      </div>
+      <div>
+        <h3>¿Por qué Ed25519 y no ECDSA otra vez?</h3>
+        <ul class="checks small">
+          <li><b>Firmas deterministas</b> — sin nonce aleatorio por firma; elimina la clase de fallas que rompió consolas y wallets con ECDSA mal implementado</li>
+          <li><b>Verificación pública</b> — la llave pública del oráculo se expone; cualquier usuario puede validar que una resolución es auténtica</li>
+          <li><b>Separación de dominios</b> — usuarios firman con secp256k1, el árbitro con Ed25519: una llave comprometida no cruza roles</li>
+        </ul>
+      </div>
+    </div>
+    <p class="footline">Flujo: mercado cierra → oráculo firma <code class="mono small">marketId:YES:1720000000</code> → firma + timestamp persistidos → pagos distribuidos → cualquiera audita la firma contra la llave pública.</p>
+  </div>
+</section>
+
+<!-- 9 · MERCADOS P2P (ECDH) -->
+<section class="slide" id="s9b">
+  <div class="slide-num">09 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Cifrado híbrido · ECDH + AES-GCM</p>
+    <h2>Mercados P2P privados: apuestas que ni el servidor puede leer</h2>
+    <div class="flow" style="margin-bottom:20px">
+      <div class="fbox hot"><b>A cifra términos</b><span>ECDH(privA, pubB) → AES-256-GCM</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>A firma + deposita</b><span>ECDSA sobre SHA-256(ciphertext)</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>B descifra</b><span>ECDH(privB, pubA) = misma clave</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>B firma + deposita</b><span>mismo terms_hash — acuerdo probado</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox gold"><b>veredictos firmados</b><span>coinciden → pago automático</span></div>
+      <div class="farrow">→<small>si no</small></div>
+      <div class="fbox"><b>oráculo Ed25519</b><span>disputa o plazo vencido</span></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>🔒 Privacidad real (simétrica + acuerdo de claves)</h3>
+        <p class="small dim">Ambas partes derivan la <b>misma clave AES-256</b> sin intercambiarla jamás: <code class="mono small">ECDH</code> sobre las llaves secp256k1 de sus wallets + SHA-256. El servidor almacena <b class="accent">solo ciphertext</b> — los términos de la apuesta son ilegibles para todos excepto los dos apostadores.</p>
+      </div>
+      <div class="card">
+        <h3>✍️ No repudio de punta a punta</h3>
+        <ul class="checks small">
+          <li>Las firmas de creación y aceptación se anclan a <code class="mono small">SHA-256(ciphertext)</code>: ambos firmaron exactamente los mismos términos</li>
+          <li>Cada veredicto lleva firma ECDSA propia — nadie puede negar su voto</li>
+          <li>Si el oráculo interviene, su resolución queda firmada con Ed25519 y es auditable</li>
+        </ul>
+      </div>
+    </div>
+    <p class="footline">Escrow: ambos depósitos quedan bloqueados hasta resolución — pago con claim condicional (imposible cobrar dos veces).</p>
+  </div>
+</section>
+
+<!-- 10 · LEDGER -->
+<section class="slide" id="s9">
+  <div class="slide-num">10 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Auditoría · Blockchain</p>
+    <h2>Bloques encadenados con SHA-256 — integridad verificable en un clic</h2>
+    <div class="grid2">
+      <div>
+        <p class="codelabel">lib/blockchain.ts — hash de bloque</p>
+        <div class="codeblock">block_hash = SHA-256(
+  número <span class="k">|</span> prev_hash <span class="k">|</span>
+  tx₁ id:tipo:from:to:monto <span class="k">;</span> tx₂ … tx₅
+)
+<span class="c">// alterar cualquier tx sellada o bloque</span>
+<span class="c">// rompe la cadena desde ese punto</span></div>
+        <p class="small dim" style="margin-top:10px">Cada 5 transacciones se sellan en un bloque cuyo hash cubre el <b>contenido</b> de las transacciones y el hash del bloque anterior — desde el bloque génesis (<code class="mono small">0×64</code>).</p>
+      </div>
+      <div class="card">
+        <h3>🛡️ Verificación pública de integridad</h3>
+        <p class="small dim">El explorador incluye <b class="accent">"Verificar cadena"</b>: el endpoint <code class="mono small">/api/blockchain/verify</code> recomputa el hash de <b>todos</b> los bloques y valida el encadenamiento.</p>
+        <ul class="checks small" style="margin-top:8px">
+          <li>Transacción alterada en la BD → hash no coincide → reporta el bloque exacto</li>
+          <li>Transacción eliminada → detectada como faltante</li>
+          <li>Bloque reordenado → prev_hash rompe la cadena</li>
+        </ul>
+        <p class="small faint mono" style="margin-top:8px">demo en vivo: editar un monto en Supabase → verificar → cadena rota en bloque #N</p>
+      </div>
+    </div>
+    <p class="footline">Doble garantía: firmas ECDSA <b>por transacción</b> (autenticidad del emisor) + encadenamiento <b>por bloque</b> (inmutabilidad del historial).</p>
+  </div>
+</section>
+
+<!-- 10 · ANTI-REPLAY -->
+<section class="slide" id="s10">
+  <div class="slide-num">11 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Protocolo · Anti-replay</p>
+    <h2>Una firma válida solo sirve una vez</h2>
+    <div class="flow" style="margin-bottom:22px">
+      <div class="fbox"><b>tx firmada</b><span>nonce = 79</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>servidor</b><span>espera nonce 79 ✓</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox gold"><b>ejecuta</b><span>nonce cuenta → 79</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox"><b>atacante reenvía</b><span>misma tx, nonce 79</span></div>
+      <div class="farrow">→</div>
+      <div class="fbox" style="border-color:rgba(217,100,89,.5); background:var(--bad-soft)"><b>rechazada</b><span>espera 80 · HTTP 400</span></div>
+    </div>
+    <div class="grid3">
+      <div class="card">
+        <h3>Nonce monotónico</h3>
+        <p class="small dim">Cada cuenta lleva un contador. El nonce va <b>dentro del mensaje firmado</b>: no se puede editar sin invalidar la firma.</p>
+      </div>
+      <div class="card">
+        <h3>Doble verificación de identidad</h3>
+        <p class="small dim">La firma prueba posesión de la llave; la BD confirma que esa llave pública corresponde a la dirección emisora.</p>
+      </div>
+      <div class="card">
+        <h3>Validación de fondos</h3>
+        <p class="small dim">Saldo verificado server-side con cliente admin (bypass de RLS solo en backend) — el cliente jamás escribe balances.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · DATOS -->
+<section class="slide" id="s11">
+  <div class="slide-num">12 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Seguridad práctica</p>
+    <h2>Protección en reposo y en tránsito</h2>
+    <div class="tablewrap">
+      <table>
+        <tr><th>Dato</th><th>Dónde vive</th><th>Protección</th></tr>
+        <tr>
+          <td>Llave privada de usuario</td>
+          <td>Navegador (localStorage)</td>
+          <td><span class="good">AES-256-GCM</span> + PBKDF2 — cifrada por el cliente, nunca viaja</td>
+        </tr>
+        <tr>
+          <td>Contraseñas de cuenta</td>
+          <td>Supabase Auth</td>
+          <td><span class="good">bcrypt</span> con salt — hasheadas por GoTrue, sesión JWT firmada</td>
+        </tr>
+        <tr>
+          <td>Base de datos (balances, mercados, tx)</td>
+          <td>Postgres · Supabase</td>
+          <td><span class="good">AES-256 at rest</span> a nivel infraestructura + Row Level Security</td>
+        </tr>
+        <tr>
+          <td>Tráfico navegador ↔ servidor</td>
+          <td>Internet público</td>
+          <td><span class="good">TLS 1.3</span> — certificado emitido y renovado por Tailscale Funnel</td>
+        </tr>
+        <tr>
+          <td>Tráfico servidor ↔ Supabase</td>
+          <td>Internet público</td>
+          <td><span class="good">TLS</span> + service role key solo en variables de entorno del server</td>
+        </tr>
+        <tr>
+          <td>Llave del oráculo</td>
+          <td>Raspberry Pi · <code>.env.local</code></td>
+          <td>Server-only — jamás importada en código de navegador</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 12 · AMENAZAS -->
+<section class="slide" id="s12">
+  <div class="slide-num">13 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Análisis de amenazas</p>
+    <h2>¿Qué pasa si…?</h2>
+    <div class="tablewrap">
+      <table>
+        <tr><th>Amenaza</th><th>Defensa</th><th>Residual</th></tr>
+        <tr>
+          <td>Atacante intercepta el tráfico</td>
+          <td>TLS extremo a extremo; la llave privada ni siquiera viaja</td>
+          <td><span class="pill ok">MITIGADO</span></td>
+        </tr>
+        <tr>
+          <td>Reenvío de una transacción firmada</td>
+          <td>Nonce monotónico dentro del mensaje firmado</td>
+          <td><span class="pill ok">MITIGADO</span></td>
+        </tr>
+        <tr>
+          <td>Resolución de mercado falsificada</td>
+          <td>Firma Ed25519 del oráculo, verificable públicamente</td>
+          <td><span class="pill ok">MITIGADO</span></td>
+        </tr>
+        <tr>
+          <td>Fuga completa de la base de datos</td>
+          <td>Sin llaves privadas que robar; contraseñas bcrypt; firmas no reutilizables</td>
+          <td><span class="pill ok">MITIGADO</span></td>
+        </tr>
+        <tr>
+          <td>XSS exfiltra el blob cifrado</td>
+          <td>AES-GCM: sin la contraseña solo queda fuerza bruta offline contra PBKDF2</td>
+          <td><span class="pill warn">DEPENDE DE PASSWORD</span></td>
+        </tr>
+        <tr>
+          <td>Servidor comprometido</td>
+          <td>No puede firmar transferencias por usuarios; <b>sí</b> podría alterar balances de juegos (modelo custodial en casino)</td>
+          <td><span class="pill warn">PARCIAL</span></td>
+        </tr>
+        <tr>
+          <td>Admin malicioso edita historia</td>
+          <td>Hash chaining SHA-256: cualquier alteración rompe la cadena y la verificación pública la delata</td>
+          <td><span class="pill ok">MITIGADO</span></td>
+        </tr>
+        <tr>
+          <td>Servidor espía apuestas privadas P2P</td>
+          <td>Cifrado extremo a extremo ECDH + AES-GCM: el servidor solo almacena ciphertext</td>
+          <td><span class="pill ok">MITIGADO</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 13 · LIMITACIONES -->
+<section class="slide" id="s13">
+  <div class="slide-num">14 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Limitaciones y trabajo futuro</p>
+    <h2>Lo que mejoraríamos con más tiempo</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>Endurecimiento criptográfico</h3>
+        <ul class="checks small">
+          <li>PBKDF2 elevado a <b>600k iteraciones</b> con formato versionado — hecho ✓</li>
+          <li>Hash chaining real de bloques + verificación pública — hecho ✓</li>
+          <li class="w">Migrar KDF a <b>Argon2id</b> (resistente a GPU/ASIC)</li>
+          <li class="w">Rotación de la llave del oráculo con publicación de llaves históricas</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Superficie de aplicación</h3>
+        <ul class="checks small">
+          <li class="w">Firmar también las apuestas de casino (hoy: custodial, autorizado solo por sesión JWT)</li>
+          <li class="w">Rate limiting en endpoints de firma para frenar fuerza bruta online</li>
+          <li class="w">Análisis estático de seguridad integrado a CI (Semgrep / CodeQL) — requisito de la entrega 2</li>
+        </ul>
+      </div>
+    </div>
+    <p class="footline">Criterio de priorización: primero lo que amplía garantías criptográficas (encadenamiento, Argon2id), después lo operacional.</p>
+  </div>
+</section>
+
+<!-- 14 · CIERRE -->
+<section class="slide" id="s14">
+  <div class="slide-num">15 / 15</div>
+  <div class="slide-inner">
+    <p class="eyebrow">Demo en vivo</p>
+    <h1 style="font-size:clamp(30px,4.5vw,52px)">5 primitivas, 1 producto funcionando</h1>
+    <div class="grid2" style="margin-bottom:24px">
+      <div class="card">
+        <dl class="kv">
+          <dt>ECDSA</dt><dd>secp256k1 — wallets, transferencias y acuerdos P2P firmados</dd>
+          <dt>ECDH</dt><dd>acuerdo de claves — mercados privados cifrados extremo a extremo</dd>
+          <dt>Ed25519</dt><dd>oráculo de resoluciones verificables</dd>
+          <dt>AES-GCM</dt><dd>bóveda de llaves + términos P2P, 256 bits autenticado</dd>
+          <dt>PBKDF2</dt><dd>derivación de llave desde contraseña maestra (×600k)</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <dl class="kv">
+          <dt>hashes</dt><dd>SHA-256 · SHA-512 · RIPEMD-160 · HMAC</dd>
+          <dt>librerías</dt><dd>@noble/* (auditadas) + WebCrypto nativo</dd>
+          <dt>infra</dt><dd>Raspberry Pi + Tailscale Funnel + Supabase</dd>
+          <dt>demo</dt><dd class="mono accent">bot.tail48662d.ts.net</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="lead">Demo: crear wallet → inspeccionar el blob AES-GCM en localStorage → transferir CHC firmando con ECDSA → verificar la transacción y su firma en el explorador → resolver un mercado y validar la firma Ed25519 del oráculo.</p>
+    <p class="footline">PeruvianMarket · Proyecto de Criptografía · UTEC · 2026</p>
+  </div>
+</section>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.getElementById('bar');
+  const pos = document.getElementById('pos');
+
+  function current() {
+    const y = window.scrollY + window.innerHeight / 2;
+    return slides.findIndex(s => y >= s.offsetTop && y < s.offsetTop + s.offsetHeight);
+  }
+  function update() {
+    const i = Math.max(0, current());
+    pos.textContent = i + 1;
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+  }
+  function go(delta) {
+    const i = Math.min(slides.length - 1, Math.max(0, current() + delta));
+    slides[i].scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
+  addEventListener('keydown', e => {
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); go(1); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    if (e.key === 'Home') { e.preventDefault(); slides[0].scrollIntoView(); }
+    if (e.key === 'End')  { e.preventDefault(); slides[slides.length-1].scrollIntoView(); }
+  });
+  addEventListener('scroll', update, { passive: true });
+  update();
+</script>

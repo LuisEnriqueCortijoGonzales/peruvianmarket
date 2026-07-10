@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PeruvianMarket — Mercados de predicción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">▲</span>
+    <span class="brand-text">Peruvian<em>Market</em></span>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" data-view="markets">Mercados</button>
+    <button class="nav-btn" data-view="wallet">Wallet</button>
+    <button class="nav-btn" data-view="create">Crear</button>
+    <button class="nav-btn" data-view="oracle">Oráculo</button>
+    <button class="nav-btn" data-view="chain">Cadena</button>
+  </nav>
+
+  <div class="wallet-pill" id="walletPill">
+    <span id="walletAddrShort">Sin wallet</span>
+    <span class="dot"></span>
+    <strong id="walletBalance">— PEN</strong>
+  </div>
+</header>
+
+<main id="mainView"></main>
+
+<!-- Modal -->
+<div id="modal" class="modal hidden">
+  <div class="modal-card" id="modalCard"></div>
+</div>
+
+<!-- Toast -->
+<div id="toastWrap"></div>
+
+<!-- Templates -->
+<template id="tpl-markets">
+  <section class="view view-markets">
+    <div class="hero">
+      <div>
+        <h1 class="hero-title">Apuesta sobre el <em>futuro</em>.</h1>
+        <p class="hero-sub">Mercados de predicción descentralizados. Precios fijados por un AMM on-chain.<br>
+        Resoluciones firmadas por oráculo Ed25519. Cero censura, cero confianza.</p>
+      </div>
+      <div class="hero-stats" id="heroStats"></div>
+    </div>
+
+    <div class="markets-grid" id="marketsGrid"></div>
+  </section>
+</template>
+
+<template id="tpl-wallet">
+  <section class="view view-wallet">
+    <h2 class="view-title">Tu wallet</h2>
+    <div id="walletPanel" class="panel">
+      <div class="wallet-empty hidden" id="walletEmpty">
+        <p>No tienes wallet en este navegador. Crea una nueva o importa una existente.</p>
+        <div class="row">
+          <button class="btn primary" id="btnNewWallet">Generar wallet nueva</button>
+          <button class="btn" id="btnImportWallet">Importar privada</button>
+        </div>
+      </div>
+      <div class="wallet-loaded hidden" id="walletLoaded">
+        <div class="kv">
+          <label>Dirección</label>
+          <code id="walletAddrFull"></code>
+          <button class="btn-icon" data-copy="walletAddrFull">copiar</button>
+        </div>
+        <div class="kv">
+          <label>Llave pública</label>
+          <code id="walletPubFull" class="mono-small"></code>
+          <button class="btn-icon" data-copy="walletPubFull">copiar</button>
+        </div>
+        <div class="kv">
+          <label>Llave privada</label>
+          <code id="walletPrivFull" class="mono-small priv"></code>
+          <button class="btn-icon" id="btnRevealPriv">mostrar</button>
+          <button class="btn-icon" data-copy="walletPrivFull">copiar</button>
+        </div>
+        <div class="kv">
+          <label>Balance</label>
+          <code id="walletBalFull"></code>
+        </div>
+        <div class="kv">
+          <label>Faucet</label>
+          <code id="walletFaucetStatus"></code>
+          <button class="btn primary small" id="btnClaimFaucet">Reclamar 100 PEN</button>
+        </div>
+        <div class="row">
+          <button class="btn" id="btnTransfer">Transferir</button>
+          <button class="btn warn" id="btnLogout">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <h3 class="section-title">Tus posiciones</h3>
+      <div id="positionsList" class="positions-list"></div>
+    </div>
+  </section>
+</template>
+
+<template id="tpl-create">
+  <section class="view view-create">
+    <h2 class="view-title">Crear mercado</h2>
+    <div class="panel">
+      <div class="form">
+        <label>Pregunta del mercado
+          <input type="text" id="mkQuestion" placeholder="¿Lima Chiclayo Sport ganará la liga 2026?">
+        </label>
+        <label>Descripción / criterios de resolución
+          <textarea id="mkDesc" rows="3" placeholder="Resuelve YES si Lima Chiclayo Sport queda primero al cierre de temporada..."></textarea>
+        </label>
+        <div class="form-row">
+          <label>Probabilidad inicial YES (0.01 - 0.99)
+            <input type="number" id="mkProb" step="0.01" min="0.01" max="0.99" value="0.50">
+          </label>
+          <label>Liquidez (PEN, mín 10)
+            <input type="number" id="mkLiq" step="1" min="10" value="50">
+          </label>
+        </div>
+        <label>Cierre (timestamp Unix, opcional)
+          <input type="number" id="mkClose" value="0">
+        </label>
+        <button class="btn primary big" id="btnCreateMarket">Firmar &amp; publicar</button>
+      </div>
+    </div>
+  </section>
+</template>
+
+<template id="tpl-oracle">
+  <section class="view view-oracle">
+    <h2 class="view-title">Oráculo</h2>
+    <div class="panel">
+      <p class="muted">El oráculo del nodo firma resoluciones con su clave Ed25519. Cualquiera puede pedir una firma (en producción esto requeriría auth). Una vez firmada, la resolución debe enviarse en una transacción <code>RESOLVE</code> firmada por el creador del mercado o cualquier wallet.</p>
+      <div class="kv">
+        <label>Clave pública del oráculo</label>
+        <code id="oraclePub" class="mono-small"></code>
+      </div>
+      <h3 class="section-title">Mercados abiertos</h3>
+      <div id="resolveList"></div>
+    </div>
+  </section>
+</template>
+
+<template id="tpl-chain">
+  <section class="view view-chain">
+    <h2 class="view-title">Cadena</h2>
+    <div class="panel">
+      <div class="chain-stats" id="chainStats"></div>
+      <h3 class="section-title">Mempool</h3>
+      <div id="mempoolList" class="block-list"></div>
+      <h3 class="section-title">Bloques</h3>
+      <div id="blockList" class="block-list"></div>
+    </div>
+  </section>
+</template>
+
+<!-- Libs criptográficas (bundle local de noble: secp256k1 + sha256 + ripemd160) -->
+<script src="/crypto.bundle.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
