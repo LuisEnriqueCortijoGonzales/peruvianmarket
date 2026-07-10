@@ -171,7 +171,7 @@
   <div class="meta">
     <b>Curso:</b> Criptografía · UTEC<br>
     <b>Aplicación:</b> Next.js 15 + Supabase · desplegada en Raspberry Pi vía Tailscale Funnel<br>
-    <b>Repositorio:</b> código fuente, presentación y guías de despliegue incluidos<br>
+    <b>Demo:</b> https://bot.tail48662d.ts.net/login<br>
     <b>Naturaleza:</b> laboratorio funcional — no maneja dinero real
   </div>
 </div>
@@ -192,10 +192,16 @@
 
   <h2 style="margin-top:24px"><span class="n">1.</span> Motivación</h2>
   <p>
-    Un grupo de amigos que quiere apostar entre sí enfrenta problemas de confianza que la
-    criptografía resuelve mejor que cualquier acuerdo verbal. En vez de depender de que alguien
-    "haga de banco" o "haga de árbitro", cada garantía se sustituye por un mecanismo criptográfico
-    verificable.
+    Frente a plataformas de mercados de predicción como <b>Polymarket</b>, falta una
+    <b>alternativa peruana</b> que aplique los mismos conceptos criptográficos. PeruvianMarket
+    nace de esa idea: una plataforma de apuestas basada en su propia moneda blockchain (CHC),
+    que combina mercados de predicción, apuestas P2P privadas y juegos de casino.
+  </p>
+  <p>
+    En el fondo, un grupo de amigos que quiere apostar entre sí enfrenta problemas de confianza
+    que la criptografía resuelve mejor que cualquier acuerdo verbal. En vez de depender de que
+    alguien "haga de banco" o "haga de árbitro", cada garantía se sustituye por un mecanismo
+    criptográfico verificable.
   </p>
   <table>
     <tr><th>Problema</th><th>Pregunta</th><th>Solución criptográfica</th></tr>
@@ -219,29 +225,23 @@
     con apuestas (motor oficial de Pokémon Showdown), minar CHC y auditar todo en un explorador
     de blockchain.
   </p>
-  <div class="diagram">┌─────────────────────────────────────────────────────────────┐
-│  NAVEGADOR DEL USUARIO   (criptografía sensible ocurre aquí)  │
-│   • Genera par de llaves secp256k1 (nunca salen del cliente)  │
-│   • Firma transacciones y veredictos con ECDSA                │
-│   • Cifra la llave privada con AES-256-GCM (bóveda local)     │
-│   • Deriva clave ECDH y cifra términos P2P con AES-256-GCM    │
-└──────────────────────────┬──────────────────────────────────┘
-                           │  HTTPS / TLS 1.3  (Tailscale Funnel)
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  RASPBERRY PI — Next.js 15 + PM2                             │
-│   • Verifica firmas ECDSA + nonce anti-replay                │
-│   • Oráculo firma resoluciones con Ed25519 (llave server)    │
-│   • Sella bloques con hash chaining SHA-256                  │
-│   • NUNCA recibe ni almacena llaves privadas de usuarios     │
-└──────────────────────────┬──────────────────────────────────┘
-                           │  TLS
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  SUPABASE  (Postgres + Auth + RLS)                          │
-│   • Cifrado AES-256 en reposo · contraseñas bcrypt + JWT     │
-│   • Almacena SOLO ciphertext de los términos P2P             │
-└─────────────────────────────────────────────────────────────┘</div>
+  <div class="diagram">┌──────────────────────────────────┐   login / signup (JWT)
+│  1. NAVEGADOR DEL USUARIO        │ ─────────────────────────┐
+│   • Genera llaves secp256k1      │                          │
+│   • Firma transacciones (ECDSA)  │                          ▼
+│   • Cifra la SK (AES-256-GCM)    │        ┌────────────────────────────────┐
+│   • ECDH: cifra términos P2P     │        │  3. SUPABASE AUTH              │
+└──────────────┬───────────────────┘        │   • bcrypt para contraseñas    │
+               │  TLS 1.3 + JWT              │   • emite JWT de sesión        │
+               ▼  (Tailscale Funnel)         └────────────────────────────────┘
+┌──────────────────────────────────┐
+│  2. SERVIDOR — Next.js 15 + PM2  │        ┌────────────────────────────────┐
+│   • Verifica ECDSA + nonce       │  TLS   │  3. SUPABASE POSTGRES         │
+│   • Oráculo Ed25519              │ ─────► │   • AES-256 en reposo          │
+│   • Hash chaining SHA-256        │        │   • RLS según el JWT           │
+│   • Lógica AMM, casino, minería  │        │   • solo accesible vía servidor│
+│   • NUNCA ve llaves privadas     │        │   • SOLO ciphertext de P2P     │
+└──────────────────────────────────┘        └────────────────────────────────┘</div>
   <div class="callout">
     <b>Principio de diseño central:</b> la llave privada de un usuario nunca abandona su
     navegador —ni en claro ni cifrada—. El servidor es un verificador de firmas y un ejecutor
@@ -372,10 +372,23 @@ firma   = <span class="hl">Ed25519_sign</span>(mensaje, ORACLE_PRIVATE_KEY)   //
   <h2 style="margin-top:20px"><span class="n">5.</span> Seguridad práctica y análisis de amenazas</h2>
   <p>
     Protección de datos <b>en reposo</b> (AES-256 en Postgres, bóveda AES-GCM en el cliente,
-    contraseñas bcrypt) y <b>en tránsito</b> (TLS 1.3 extremo a extremo). Análisis estático con
-    <code>tsc --noEmit</code> y <code>npm audit</code> (0 vulnerabilidades tras corregir postcss
-    mediante <i>overrides</i>).
+    contraseñas bcrypt) y <b>en tránsito</b> (TLS 1.3 extremo a extremo, autenticación por JWT).
   </p>
+  <h3>Herramientas de análisis estático de seguridad</h3>
+  <p>Se aplicaron dos escáneres complementarios sobre el código:</p>
+  <table>
+    <tr><th>Herramienta</th><th>Qué analiza</th><th>Resultado</th></tr>
+    <tr><td><b>Semgrep</b> (SAST)</td><td>Patrones inseguros en el código fuente — 225 reglas de la comunidad + reglas TS</td><td><span class="pill ok">0 hallazgos</span> · 22 reglas ejecutadas · 88 archivos escaneados</td></tr>
+    <tr><td><b>npm audit</b></td><td>Vulnerabilidades conocidas (CVE/GHSA) en dependencias</td><td><span class="pill ok">0 vulnerabilidades</span></td></tr>
+    <tr><td><code>tsc --noEmit</code></td><td>Análisis estático de tipos</td><td><span class="pill ok">0 errores</span></td></tr>
+  </table>
+  <div class="callout">
+    <b>Semgrep</b> (Static Application Security Testing) escaneó los 88 archivos rastreados por
+    git contra su registro de reglas de seguridad y no encontró ningún patrón vulnerable
+    (0 <i>findings</i>, 0 <i>blocking</i>). <b>npm audit</b> detectó y se corrigió previamente
+    una vulnerabilidad moderada en <code>postcss</code> mediante <i>overrides</i>, sin degradar
+    Next.js.
+  </div>
   <table>
     <tr><th>Amenaza</th><th>Defensa</th><th>Estado</th></tr>
     <tr><td>Intercepción de tráfico</td><td>TLS 1.3; la llave privada nunca viaja</td><td><span class="pill ok">MITIGADO</span></td></tr>
@@ -392,13 +405,21 @@ firma   = <span class="hl">Ed25519_sign</span>(mensaje, ORACLE_PRIVATE_KEY)   //
 
 <!-- ── 6, 7, 8 ─────────────────────────────────────────────── -->
 <div class="section">
-  <h2><span class="n">6.</span> Limitaciones conocidas</h2>
+  <h2><span class="n">6.</span> Limitaciones conocidas y mejoras futuras</h2>
+  <p><b>Limitaciones actuales:</b></p>
   <ul>
     <li><b>Casino custodial:</b> las apuestas de casino se autorizan por sesión JWT, no por firma ECDSA (decisión de UX para partidas rápidas). Las transferencias y los mercados P2P sí exigen firma.</li>
-    <li><b>Batallas Pokémon en memoria:</b> el estado de combate vive en RAM; si el servidor reinicia a mitad de una batalla, esta se cancela y ambos recuperan su apuesta (detectado automáticamente, sin pérdida de fondos).</li>
-    <li><b>Oráculo centralizado:</b> el árbitro es una única llave Ed25519 del administrador. Un esquema de umbral (t-de-n) sería más robusto pero excede el alcance.</li>
-    <li><b>KDF:</b> PBKDF2 ×600k cumple OWASP 2023, pero Argon2id (resistente a GPU/ASIC) sería superior; se dejó como trabajo futuro por disponibilidad en WebCrypto.</li>
+    <li><b>Oráculo centralizado:</b> el árbitro de disputas es una única llave Ed25519 del administrador.</li>
+    <li><b>Confianza en el servidor:</b> aunque las llaves privadas nunca lo tocan, el servidor ejecuta la lógica de casino y mercados, por lo que aún requiere cierta confianza.</li>
   </ul>
+  <p style="margin-top:8px"><b>Mejoras planificadas</b> (líneas de trabajo futuro):</p>
+  <table>
+    <tr><th>Mejora</th><th>Detalle</th></tr>
+    <tr><td>Mejorar el mecanismo de oráculo de resolución</td><td>Pasar de una llave única a un esquema de umbral (t-de-n) o múltiples oráculos, reduciendo el punto único de confianza en el arbitraje.</td></tr>
+    <tr><td>Migración de KDF a Argon2id</td><td>PBKDF2 ×600k cumple OWASP 2023, pero Argon2id es resistente a GPU/ASIC y sería superior para derivar la clave de la bóveda.</td></tr>
+    <tr><td>Reducir la confianza en el servidor</td><td>Mover más lógica a verificación criptográfica del lado del cliente / on-chain, minimizando lo que el servidor puede alterar.</td></tr>
+    <tr><td>Mejora contra ataques DoS</td><td>Rate limiting en los endpoints de firma y de juego para frenar abuso y fuerza bruta en línea.</td></tr>
+  </table>
 
   <h2 style="margin-top:18px"><span class="n">7.</span> Evaluación de resultados</h2>
   <p>Logros verificables:</p>

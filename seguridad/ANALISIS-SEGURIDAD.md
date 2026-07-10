@@ -13,12 +13,18 @@
 
 | Herramienta | Tipo de análisis | Resultado |
 |---|---|---|
+| **Semgrep** (SAST) | Análisis estático de patrones inseguros en el código fuente | ✅ **0 hallazgos** (22 reglas, 88 archivos) |
 | **`npm audit`** | Escáner de vulnerabilidades en dependencias (CVE / GHSA) | ✅ **0 vulnerabilidades** |
 | **`tsc --noEmit`** | Análisis estático de tipos (TypeScript) | ✅ 0 errores |
 | **`next lint` (ESLint)** | Linting estático de código | ✅ sin errores bloqueantes |
 
-La evidencia cruda del escaneo de dependencias está en:
-- [`npm-audit.txt`](npm-audit.txt) — salida legible
+**Semgrep** es la herramienta principal de *Static Application Security Testing* (SAST) que
+analiza el código fuente contra un registro de reglas de seguridad (inyección, secretos
+hardcodeados, uso inseguro de APIs, etc.). Se ejecutó con el ruleset `p/security-audit`.
+
+La evidencia cruda está en:
+- [`semgrep-output.txt`](semgrep-output.txt) — resumen del escaneo SAST (0 findings)
+- [`npm-audit.txt`](npm-audit.txt) — salida del escaneo de dependencias
 - [`npm-audit.json`](npm-audit.json) — reporte completo en formato JSON (`auditReportVersion: 2`)
 
 ---

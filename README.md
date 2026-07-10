@@ -231,6 +231,16 @@ Todos los algoritmos siguen estándares actuales: no se usan hashes rotos (MD5, 
 | Doble gasto / doble cobro (concurrencia) | Débito atómico `try_debit` + claims condicionales por estado | **Mitigado** |
 | XSS exfiltra el blob cifrado de la llave | AES-GCM + PBKDF2 ×600k → solo fuerza bruta offline contra la contraseña | **Depende de la contraseña** |
 
+### Análisis estático de seguridad
+
+Se aplicaron dos escáneres complementarios (evidencia en [`seguridad/`](seguridad/)):
+
+| Herramienta | Qué analiza | Resultado |
+|---|---|---|
+| **Semgrep** (SAST) | Patrones inseguros en el código fuente (ruleset `p/security-audit`) | **0 hallazgos** · 22 reglas · 88 archivos |
+| **npm audit** | Vulnerabilidades conocidas (CVE/GHSA) en dependencias | **0 vulnerabilidades** |
+| `tsc --noEmit` | Análisis estático de tipos | 0 errores |
+
 ---
 
 ## 6. Limitaciones conocidas
