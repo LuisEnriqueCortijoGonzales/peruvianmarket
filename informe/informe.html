@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Informe Técnico — PeruvianMarket</title>
+<style>
+  :root {
+    --ink: #1a1712;
+    --ink-soft: #4a453d;
+    --faint: #6b655b;
+    --terra: #c15426;
+    --terra-soft: #f3e6de;
+    --rule: #d8d2c6;
+    --code-bg: #f6f3ec;
+    --ok: #2e7d52;
+    --warn: #b07d1a;
+    --serif: Georgia, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: "Cascadia Code", "Consolas", "SF Mono", Menlo, monospace;
+  }
+
+  @page {
+    size: A4;
+    margin: 20mm 18mm;
+  }
+  @page :first { margin: 0; }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: var(--serif);
+    color: var(--ink);
+    font-size: 10.5pt;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* ── Portada ───────────────────────────────────────────── */
+  .cover {
+    height: 297mm;
+    padding: 45mm 22mm 22mm;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #1a1712 0%, #2a231a 55%, #3a2c1e 100%);
+    color: #f2e9dc;
+    page-break-after: always;
+  }
+  .cover .brand {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 60mm;
+  }
+  .cover .logo {
+    width: 42px; height: 42px; border-radius: 10px; background: var(--terra);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+  }
+  .cover .wordmark { font-family: var(--sans); font-size: 15pt; font-weight: 800; }
+  .cover .wordmark .a { color: #e8814f; }
+  .cover .kicker {
+    font-family: var(--mono); font-size: 9.5pt; letter-spacing: .25em;
+    text-transform: uppercase; color: #e8814f; margin-bottom: 14px;
+  }
+  .cover h1 {
+    font-family: var(--sans); font-size: 30pt; font-weight: 800;
+    line-height: 1.1; margin: 0 0 18px; letter-spacing: -.5px;
+  }
+  .cover .sub {
+    font-size: 12pt; color: #cfc4b4; max-width: 130mm; line-height: 1.5; margin-bottom: auto;
+  }
+  .cover .meta {
+    font-family: var(--sans); font-size: 10pt; color: #b8ac9a;
+    border-top: 1px solid rgba(242,233,220,.2); padding-top: 16px; line-height: 1.8;
+  }
+  .cover .meta b { color: #f2e9dc; font-weight: 600; }
+
+  /* ── Cuerpo ────────────────────────────────────────────── */
+  h2 {
+    font-family: var(--sans); font-size: 15pt; font-weight: 800; color: var(--ink);
+    margin: 0 0 4px; padding-top: 4px;
+    border-bottom: 2px solid var(--terra); padding-bottom: 6px;
+    page-break-after: avoid;
+  }
+  h2 .n { color: var(--terra); font-variant-numeric: tabular-nums; }
+  h3 {
+    font-family: var(--sans); font-size: 11.5pt; font-weight: 700; color: var(--ink);
+    margin: 16px 0 4px; page-break-after: avoid;
+  }
+  p { margin: 6px 0; text-align: justify; }
+  .lead { font-size: 11pt; color: var(--ink-soft); }
+  strong { color: var(--ink); }
+  .section { page-break-before: always; padding-top: 2mm; }
+
+  a { color: var(--terra); text-decoration: none; }
+  code {
+    font-family: var(--mono); font-size: 8.8pt;
+    background: var(--code-bg); padding: 1px 4px; border-radius: 3px; color: #8a3d1a;
+  }
+
+  .diagram {
+    font-family: var(--mono); font-size: 8pt; line-height: 1.45;
+    background: var(--code-bg); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 12px 14px; margin: 10px 0; white-space: pre; overflow: hidden;
+    color: var(--ink-soft); page-break-inside: avoid;
+  }
+  .diagram .hl { color: var(--terra); font-weight: 700; }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 9.3pt;
+    page-break-inside: avoid;
+  }
+  th {
+    font-family: var(--sans); font-size: 8pt; text-transform: uppercase;
+    letter-spacing: .05em; text-align: left; color: var(--faint);
+    border-bottom: 1.5px solid var(--ink); padding: 5px 8px 5px 0; font-weight: 700;
+  }
+  td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  td:first-child, th:first-child { padding-left: 2px; }
+
+  .pill {
+    font-family: var(--sans); font-size: 7.5pt; font-weight: 700;
+    padding: 1px 7px; border-radius: 20px; white-space: nowrap;
+  }
+  .pill.ok { background: #e0f0e7; color: var(--ok); }
+  .pill.warn { background: #f5ecd6; color: var(--warn); }
+
+  ul { margin: 6px 0; padding-left: 18px; }
+  li { margin: 3px 0; }
+
+  .callout {
+    background: var(--terra-soft); border-left: 3px solid var(--terra);
+    padding: 8px 14px; margin: 12px 0; font-size: 9.5pt; border-radius: 0 4px 4px 0;
+    page-break-inside: avoid;
+  }
+  .callout b { color: #8a3d1a; }
+
+  .toc { font-family: var(--sans); font-size: 10.5pt; }
+  .toc-row {
+    display: flex; align-items: baseline; gap: 8px; padding: 5px 0;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .toc-row .num { color: var(--terra); font-weight: 700; width: 22px; }
+  .toc-row .t { flex: 1; }
+  .toc-row .pg { color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  .keyrow {
+    display: grid; grid-template-columns: 60px 1fr; gap: 4px 12px;
+    font-size: 9.5pt; margin: 4px 0;
+  }
+  .keyrow dt { font-family: var(--mono); color: var(--terra); font-size: 9pt; }
+  .keyrow dd { margin: 0; }
+
+  .footer-note {
+    margin-top: 14px; padding-top: 8px; border-top: 1px solid var(--rule);
+    font-size: 8.5pt; color: var(--faint); font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── PORTADA ─────────────────────────────────────────────── -->
+<div class="cover">
+  <div class="brand">
+    <div class="logo">📈</div>
+    <div class="wordmark">Peruvian<span class="a">Market</span></div>
+  </div>
+  <p class="kicker">Proyecto de Criptografía Aplicada</p>
+  <h1>Informe Técnico:<br>Criptografía de extremo a extremo en un mercado de predicción</h1>
+  <p class="sub">
+    Plataforma web de mercados de predicción, apuestas P2P privadas y casino entre amigos,
+    construida sobre cinco primitivos criptográficos reales: ECDSA, ECDH, Ed25519,
+    AES-256-GCM y PBKDF2.
+  </p>
+  <div class="meta">
+    <b>Curso:</b> Criptografía · UTEC<br>
+    <b>Aplicación:</b> Next.js 15 + Supabase · desplegada en Raspberry Pi vía Tailscale Funnel<br>
+    <b>Repositorio:</b> código fuente, presentación y guías de despliegue incluidos<br>
+    <b>Naturaleza:</b> laboratorio funcional — no maneja dinero real
+  </div>
+</div>
+
+<!-- ── ÍNDICE ──────────────────────────────────────────────── -->
+<div class="section">
+  <h2><span class="n">—</span> Índice</h2>
+  <div class="toc">
+    <div class="toc-row"><span class="num">1</span><span class="t">Motivación</span><span class="pg">3</span></div>
+    <div class="toc-row"><span class="num">2</span><span class="t">Descripción del sistema y arquitectura</span><span class="pg">3</span></div>
+    <div class="toc-row"><span class="num">3</span><span class="t">Componentes criptográficos y flujos</span><span class="pg">4</span></div>
+    <div class="toc-row"><span class="num">4</span><span class="t">Justificación de algoritmos y librerías</span><span class="pg">7</span></div>
+    <div class="toc-row"><span class="num">5</span><span class="t">Seguridad práctica y análisis de amenazas</span><span class="pg">7</span></div>
+    <div class="toc-row"><span class="num">6</span><span class="t">Limitaciones conocidas</span><span class="pg">8</span></div>
+    <div class="toc-row"><span class="num">7</span><span class="t">Evaluación de resultados</span><span class="pg">8</span></div>
+    <div class="toc-row"><span class="num">8</span><span class="t">Stack, despliegue y estructura</span><span class="pg">9</span></div>
+  </div>
+
+  <h2 style="margin-top:24px"><span class="n">1.</span> Motivación</h2>
+  <p>
+    Un grupo de amigos que quiere apostar entre sí enfrenta problemas de confianza que la
+    criptografía resuelve mejor que cualquier acuerdo verbal. En vez de depender de que alguien
+    "haga de banco" o "haga de árbitro", cada garantía se sustituye por un mecanismo criptográfico
+    verificable.
+  </p>
+  <table>
+    <tr><th>Problema</th><th>Pregunta</th><th>Solución criptográfica</th></tr>
+    <tr><td><b>Custodia</b></td><td>¿Quién guarda el dinero y con qué autoridad lo mueve?</td><td>Cada usuario posee su par de llaves; toda transferencia exige su <b>firma ECDSA</b>.</td></tr>
+    <tr><td><b>Privacidad</b></td><td>¿Cómo aposto algo personal sin que un tercero lo lea?</td><td>Términos cifrados con <b>ECDH + AES-256-GCM</b> entre las dos partes.</td></tr>
+    <tr><td><b>Arbitraje</b></td><td>¿Quién decide quién ganó y cómo lo pruebo?</td><td>Veredictos firmados; en disputa, un <b>oráculo Ed25519</b> resuelve de forma auditable.</td></tr>
+    <tr><td><b>Historial</b></td><td>¿Cómo demuestro que algo ocurrió sin alteración?</td><td>Ledger con <b>hash chaining SHA-256</b> verificable en un clic.</td></tr>
+  </table>
+  <p>
+    El objetivo académico es aplicar los primitivos vistos en clase —simétricos, asimétricos,
+    hashes, derivación de claves, firmas y acuerdo de claves— en un caso de uso realista,
+    tomando decisiones concretas de diseño y seguridad.
+  </p>
+
+  <h2 style="margin-top:20px"><span class="n">2.</span> Descripción del sistema y arquitectura</h2>
+  <p>
+    PeruvianMarket es una aplicación web donde los usuarios gestionan una wallet propia de
+    CHCoin (CHC) y pueden: crear <b>mercados de predicción</b> (AMM <code>x·y=k</code> y
+    parimutuel), abrir <b>mercados P2P privados</b> cifrados extremo a extremo, jugar en un
+    <b>casino</b> de 7 juegos con <i>house edge</i> configurable, librar <b>batallas Pokémon</b>
+    con apuestas (motor oficial de Pokémon Showdown), minar CHC y auditar todo en un explorador
+    de blockchain.
+  </p>
+  <div class="diagram">┌─────────────────────────────────────────────────────────────┐
+│  NAVEGADOR DEL USUARIO   (criptografía sensible ocurre aquí)  │
+│   • Genera par de llaves secp256k1 (nunca salen del cliente)  │
+│   • Firma transacciones y veredictos con ECDSA                │
+│   • Cifra la llave privada con AES-256-GCM (bóveda local)     │
+│   • Deriva clave ECDH y cifra términos P2P con AES-256-GCM    │
+└──────────────────────────┬──────────────────────────────────┘
+                           │  HTTPS / TLS 1.3  (Tailscale Funnel)
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│  RASPBERRY PI — Next.js 15 + PM2                             │
+│   • Verifica firmas ECDSA + nonce anti-replay                │
+│   • Oráculo firma resoluciones con Ed25519 (llave server)    │
+│   • Sella bloques con hash chaining SHA-256                  │
+│   • NUNCA recibe ni almacena llaves privadas de usuarios     │
+└──────────────────────────┬──────────────────────────────────┘
+                           │  TLS
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│  SUPABASE  (Postgres + Auth + RLS)                          │
+│   • Cifrado AES-256 en reposo · contraseñas bcrypt + JWT     │
+│   • Almacena SOLO ciphertext de los términos P2P             │
+└─────────────────────────────────────────────────────────────┘</div>
+  <div class="callout">
+    <b>Principio de diseño central:</b> la llave privada de un usuario nunca abandona su
+    navegador —ni en claro ni cifrada—. El servidor es un verificador de firmas y un ejecutor
+    de lógica, jamás un custodio de secretos.
+  </div>
+</div>
+
+<!-- ── 3. COMPONENTES ──────────────────────────────────────── -->
+<div class="section">
+  <h2><span class="n">3.</span> Componentes criptográficos y flujos</h2>
+  <p class="lead">
+    Se implementan cinco primitivas cubriendo criptografía simétrica, asimétrica, funciones
+    hash, derivación de claves y acuerdo de claves. Ninguna fue programada desde cero.
+  </p>
+
+  <h3>3.1 · Wallets estilo Bitcoin — secp256k1 (asimétrica)</h3>
+  <p>La dirección se deriva igual que en Bitcoin (P2PKH), con byte de versión propio <code>0x35</code> (prefijo "N"):</p>
+  <div class="diagram">privKey (32 B, CSPRNG)
+   ├─► pubKey comprimida (33 B)
+   ├─► hash160   = <span class="hl">RIPEMD-160</span>(<span class="hl">SHA-256</span>(pubKey))
+   ├─► versioned = 0x35 ‖ hash160
+   ├─► checksum  = SHA-256(SHA-256(versioned))[:4]
+   └─► dirección = <span class="hl">Base58</span>(versioned ‖ checksum)   →  "N..."</div>
+  <p>El checksum de 4 bytes detecta direcciones mal tipeadas antes de mover fondos. Archivo: <code>web/src/lib/crypto.ts</code>.</p>
+
+  <h3>3.2 · Firma de transacciones — ECDSA</h3>
+  <p>
+    Toda transferencia se firma en el cliente sobre un <b>JSON canónico</b> (claves ordenadas
+    alfabéticamente, de modo que cliente y servidor computan el mismo hash) y se verifica
+    server-side con triple control:
+  </p>
+  <div class="diagram">CLIENTE                            │  SERVIDOR (api/wallet/transfer)
+───────────────────────────────────┼───────────────────────────────
+msg  = canonicalJSON(txData)        │  1) verifySignature(tx,sig,pub)? → 401
+hash = <span class="hl">SHA-256</span>(msg)                   │  2) walletOwns(from, pub)?       → 401
+sig  = <span class="hl">ECDSA_sign</span>(hash, privKey)      │  3) nonce == currentNonce + 1 ?  → 400
+POST {tx, sig, pub} ───────────────►│     (anti-replay) → débito atómico</div>
+  <p>El mensaje firmado incluye <code>{type, from, to, amount, nonce, timestamp}</code>; alterar cualquier campo invalida la firma.</p>
+
+  <h3>3.3 · Bóveda de llave privada — AES-256-GCM + PBKDF2 (simétrica + KDF)</h3>
+  <p>La llave privada se cifra en el navegador antes de tocar disco (<code>localStorage</code>):</p>
+  <table>
+    <tr><th>Parámetro</th><th>Valor</th><th>Justificación</th></tr>
+    <tr><td>Cifrado</td><td><b>AES-256-GCM</b></td><td>Cifrado autenticado: confidencialidad + integridad (tag 128 bits) en una operación.</td></tr>
+    <tr><td>KDF</td><td><b>PBKDF2-SHA256, 600 000 iter.</b></td><td>Recomendación OWASP 2023; ralentiza fuerza bruta offline.</td></tr>
+    <tr><td>Salt</td><td>16 B CSPRNG, único</td><td>Evita rainbow tables.</td></tr>
+    <tr><td>IV / nonce</td><td>12 B CSPRNG, único</td><td>Nunca se reutiliza con la misma clave (requisito de GCM).</td></tr>
+    <tr><td>Formato</td><td><code>v2:</code> Base64(salt‖iv‖ct+tag)</td><td>Versionado: migración transparente desde blobs de 100k iteraciones.</td></tr>
+  </table>
+  <p>El servidor nunca ve este blob; sin la contraseña maestra es inútil, y GCM detecta cualquier manipulación.</p>
+
+  <h3>3.4 · Mercados P2P privados — ECDH + AES-GCM + doble firma (cifrado híbrido)</h3>
+  <p>
+    El aporte más completo del proyecto. Ambas partes derivan la <b>misma clave simétrica sin
+    transmitirla jamás</b>, gracias a la propiedad del acuerdo de claves Diffie-Hellman sobre
+    curva elíptica:
+  </p>
+  <div class="diagram">   Alice (creadora)                        Bob (retado)
+   ────────────────                        ────────────
+   <span class="hl">ECDH</span>(privA, pubB) ──┐             ┌── <span class="hl">ECDH</span>(privB, pubA)
+                     ├── mismo punto ──┤
+                     ▼                 ▼
+            <span class="hl">SHA-256</span>(coordenada X del punto compartido)
+                     │                 │
+                     ▼                 ▼
+            clave AES-256 idéntica en ambos lados</div>
+  <p>Sobre esa clave se ejecuta el protocolo de cuatro fases:</p>
+  <div class="diagram">1. CREAR    Alice cifra los términos (AES-256-GCM, clave ECDH)
+            terms_hash = SHA-256(ciphertext)
+            firma ECDSA sobre {P2P_CREATE, from, to, amount,
+                               terms_hash, deadline, nonce, ts}
+            → deposita en escrow. El servidor guarda SOLO ciphertext.
+
+2. ACEPTAR  Bob descifra localmente (ECDH es simétrico), revisa,
+            firma ECDSA sobre el MISMO terms_hash  → acuerdo probado
+            → deposita. Pot en escrow (2× amount).
+
+3. VEREDICTO  Cada parte firma su veredicto.
+            coinciden → pago automático al ganador
+            difieren  → estado "disputa"
+
+4. ORÁCULO  Si hay disputa o vence el plazo, el oráculo resuelve
+            y FIRMA con Ed25519. La firma queda auditable.</div>
+  <p>
+    El anclaje de ambas firmas a <code>SHA-256(ciphertext)</code> garantiza <b>no repudio</b>:
+    ninguna parte puede negar que aceptó exactamente esos términos. Archivos:
+    <code>crypto.ts</code>, <code>p2p.ts</code>, <code>app/p2p/</code>.
+  </p>
+
+  <h3>3.5 · Oráculo de resoluciones — Ed25519 (asimétrica)</h3>
+  <p>El oráculo firma cada resolución con un mensaje canónico:</p>
+  <div class="diagram">mensaje = "p2p:{marketId}:{winnerAddress}:{timestamp}"
+firma   = <span class="hl">Ed25519_sign</span>(mensaje, ORACLE_PRIVATE_KEY)   // solo en el servidor</div>
+  <p><b>¿Por qué Ed25519 y no ECDSA de nuevo?</b></p>
+  <ul>
+    <li><b>Firmas deterministas:</b> sin nonce aleatorio por firma, eliminando una clase entera de fallas que rompió wallets con ECDSA mal implementado.</li>
+    <li><b>Verificación pública:</b> la llave pública del oráculo se expone; cualquiera valida que una resolución es auténtica.</li>
+    <li><b>Separación de dominios:</b> los usuarios firman con secp256k1, el árbitro con Ed25519 — una llave comprometida no cruza roles.</li>
+  </ul>
+
+  <h3>3.6 · Blockchain con hash chaining — SHA-256</h3>
+  <p>Las transacciones se sellan en bloques de 5, encadenados por hash:</p>
+  <div class="diagram">block_hash = <span class="hl">SHA-256</span>( número | prev_hash | tx1:tipo:from:to:monto ; ... ; tx5 )</div>
+  <p>
+    Alterar cualquier transacción sellada o bloque rompe la cadena desde ese punto. El explorador
+    incluye un botón <b>"Verificar cadena"</b> que recomputa todos los hashes y reporta el primer
+    bloque inválido si la base de datos fue manipulada. Archivo: <code>web/src/lib/blockchain.ts</code>.
+  </p>
+</div>
+
+<!-- ── 4 y 5 ───────────────────────────────────────────────── -->
+<div class="section">
+  <h2><span class="n">4.</span> Justificación de algoritmos y librerías</h2>
+  <p>
+    Se usan exclusivamente librerías probadas y auditadas; <b>no se implementó ningún primitivo
+    criptográfico desde cero</b> (requisito del curso). Todos los algoritmos siguen estándares
+    actuales: no se usan hashes rotos (MD5, SHA-1) ni modos débiles (DES, ECB).
+  </p>
+  <table>
+    <tr><th>Librería</th><th>Uso</th><th>Por qué</th></tr>
+    <tr><td><code>@noble/secp256k1</code></td><td>ECDSA (firmas) + ECDH (acuerdo de claves)</td><td>Auditada de forma independiente; usada en producción por MetaMask y otros.</td></tr>
+    <tr><td><code>@noble/ed25519</code></td><td>Firmas del oráculo</td><td>Misma familia minimalista, sin dependencias.</td></tr>
+    <tr><td><code>@noble/hashes</code></td><td>SHA-256, SHA-512, RIPEMD-160, HMAC</td><td>Implementaciones de tiempo constante, revisadas.</td></tr>
+    <tr><td><b>WebCrypto</b> <code>crypto.subtle</code></td><td>AES-256-GCM + PBKDF2</td><td>Primitivos nativos del navegador, no reimplementados en JS.</td></tr>
+    <tr><td><code>@pkmn/sim</code></td><td>Motor de batallas Pokémon</td><td>Código oficial de Pokémon Showdown (licencia MIT).</td></tr>
+  </table>
+
+  <h2 style="margin-top:20px"><span class="n">5.</span> Seguridad práctica y análisis de amenazas</h2>
+  <p>
+    Protección de datos <b>en reposo</b> (AES-256 en Postgres, bóveda AES-GCM en el cliente,
+    contraseñas bcrypt) y <b>en tránsito</b> (TLS 1.3 extremo a extremo). Análisis estático con
+    <code>tsc --noEmit</code> y <code>npm audit</code> (0 vulnerabilidades tras corregir postcss
+    mediante <i>overrides</i>).
+  </p>
+  <table>
+    <tr><th>Amenaza</th><th>Defensa</th><th>Estado</th></tr>
+    <tr><td>Intercepción de tráfico</td><td>TLS 1.3; la llave privada nunca viaja</td><td><span class="pill ok">MITIGADO</span></td></tr>
+    <tr><td>Replay de transacción firmada</td><td>Nonce monotónico dentro del mensaje firmado</td><td><span class="pill ok">MITIGADO</span></td></tr>
+    <tr><td>Resolución falsificada</td><td>Firma Ed25519 del oráculo, verificable</td><td><span class="pill ok">MITIGADO</span></td></tr>
+    <tr><td>Fuga completa de la base de datos</td><td>Sin llaves privadas; bcrypt; firmas no reutilizables</td><td><span class="pill ok">MITIGADO</span></td></tr>
+    <tr><td>Servidor espía apuestas P2P</td><td>Cifrado E2E ECDH + AES-GCM; solo ciphertext</td><td><span class="pill ok">MITIGADO</span></td></tr>
+    <tr><td>Una parte niega el acuerdo P2P</td><td>Firmas ECDSA ancladas a SHA-256(ciphertext)</td><td><span class="pill ok">MITIGADO</span></td></tr>
+    <tr><td>Admin edita el historial</td><td>Hash chaining SHA-256 + verificación pública</td><td><span class="pill ok">MITIGADO</span></td></tr>
+    <tr><td>Doble gasto / doble cobro</td><td>Débito atómico + claims condicionales por estado</td><td><span class="pill ok">MITIGADO</span></td></tr>
+    <tr><td>XSS exfiltra el blob cifrado</td><td>AES-GCM + PBKDF2 ×600k → solo fuerza bruta offline</td><td><span class="pill warn">DEPENDE DE LA CLAVE</span></td></tr>
+  </table>
+</div>
+
+<!-- ── 6, 7, 8 ─────────────────────────────────────────────── -->
+<div class="section">
+  <h2><span class="n">6.</span> Limitaciones conocidas</h2>
+  <ul>
+    <li><b>Casino custodial:</b> las apuestas de casino se autorizan por sesión JWT, no por firma ECDSA (decisión de UX para partidas rápidas). Las transferencias y los mercados P2P sí exigen firma.</li>
+    <li><b>Batallas Pokémon en memoria:</b> el estado de combate vive en RAM; si el servidor reinicia a mitad de una batalla, esta se cancela y ambos recuperan su apuesta (detectado automáticamente, sin pérdida de fondos).</li>
+    <li><b>Oráculo centralizado:</b> el árbitro es una única llave Ed25519 del administrador. Un esquema de umbral (t-de-n) sería más robusto pero excede el alcance.</li>
+    <li><b>KDF:</b> PBKDF2 ×600k cumple OWASP 2023, pero Argon2id (resistente a GPU/ASIC) sería superior; se dejó como trabajo futuro por disponibilidad en WebCrypto.</li>
+  </ul>
+
+  <h2 style="margin-top:18px"><span class="n">7.</span> Evaluación de resultados</h2>
+  <p>Logros verificables:</p>
+  <ul>
+    <li><b>Cinco primitivas</b> funcionando en un producto real desplegado: ECDSA, ECDH, Ed25519, AES-256-GCM y PBKDF2, más SHA-256/512 y RIPEMD-160.</li>
+    <li><b>Cifrado híbrido completo</b> (KEM/DEM conceptual): ECDH acuerda la clave, AES-GCM cifra los datos — los mercados P2P privados.</li>
+    <li><b>No repudio y privacidad E2E</b> demostrables en vivo: se abre la base de datos y se muestra que los términos son ilegibles, luego se descifran en la interfaz con la contraseña del usuario.</li>
+    <li><b>Concurrencia segura:</b> operaciones de dinero atómicas, verificadas para múltiples usuarios simultáneos.</li>
+    <li><b>Auditabilidad:</b> blockchain con verificación de integridad de un clic.</li>
+  </ul>
+  <p><b>Fallas y aprendizajes.</b> La primera versión de la "blockchain" usaba hashes falsos derivados del ID de transacción (agrupación visual, sin garantía real); se corrigió a hash chaining verdadero. El límite de memoria de PM2 causaba reinicios que cancelaban batallas; se diagnosticó y ajustó. Ambos casos ilustran la diferencia entre <i>"parece criptográfico"</i> y <i>"es criptográficamente sólido"</i>.</p>
+
+  <h2 style="margin-top:18px"><span class="n">8.</span> Stack, despliegue y estructura</h2>
+  <div class="keyrow"><dt>Frontend</dt><dd>Next.js 15 (App Router) + TypeScript + Tailwind CSS</dd></div>
+  <div class="keyrow"><dt>Backend</dt><dd>API routes de Next.js sobre Node.js</dd></div>
+  <div class="keyrow"><dt>Base datos</dt><dd>Supabase (Postgres + Auth + Row Level Security)</dd></div>
+  <div class="keyrow"><dt>Hosting</dt><dd>Raspberry Pi + PM2, expuesta con Tailscale Funnel (HTTPS sin abrir puertos)</dd></div>
+  <p style="margin-top:10px">Estructura del repositorio (resumen):</p>
+  <div class="diagram">proyecto11/
+├── web/                       Aplicación Next.js
+│   ├── src/lib/crypto.ts      secp256k1, ECDH, AES-GCM, PBKDF2, direcciones
+│   ├── src/lib/oracle.ts      firmas Ed25519 del oráculo
+│   ├── src/lib/p2p.ts         lógica de mercados P2P
+│   ├── src/lib/blockchain.ts  hash chaining SHA-256
+│   ├── src/app/api/           rutas de backend (wallet, p2p, casino, pokemon)
+│   └── sql/                   migraciones de base de datos
+├── deploy-rpi/                scripts y guías de despliegue
+├── PROYECTO.md                resumen ejecutivo
+└── README.md                  informe en Markdown</div>
+  <div class="callout">
+    <b>Nota de seguridad:</b> <code>web/.env.local</code> (llaves de Supabase y del oráculo) y
+    cualquier <code>*_key.json</code> no están versionados en el repositorio — deben copiarse
+    manualmente o recrearse desde las plantillas.
+  </div>
+  <p class="footer-note">
+    Proyecto académico — no maneja dinero real. Los nombres y sprites de Pokémon son propiedad de
+    Nintendo / The Pokémon Company; su uso aquí es sin fines de lucro, en el mismo espíritu que
+    Pokémon Showdown.
+  </p>
+</div>
+
+</body>
+</html>
